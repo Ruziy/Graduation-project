@@ -17,11 +17,11 @@ import dlib
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-def detect_faces(frame, model_name, detector=None, net=None, confidence_threshold=0.5):
+def detect_faces(frame, model_name, detector=None, net=None, confidence_threshold=0.9):
     h, w, _ = frame.shape
 
     if model_name == "yolov8":
-        results = detector(frame, device=0)
+        results = detector(frame, device=device)
         return [r.boxes.xyxy.cpu().numpy() for r in results][0]
     elif model_name == "dlib":
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -63,11 +63,21 @@ def main():
     parser.add_argument('--model', type=str, required=True, choices=["yolov8", "mtcnn", "insightface", "retinaface", "mediapipe", "dlib", "haarcascade", "ssd"], help="Выберите модель для распознавания лиц")
     args = parser.parse_args()
     args.input_dir = r"C:\Users\Alex\Desktop\diplom\Graduation-project\speed_test\data\random_5000"
+    # Проверка доступности CUDA в PyTorch
+    global device
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # Принудительно выключено
+    device = 'cpu'
 
+    if device == 'cpu':
+        print("Процесс детекции будет реализован на CPU, в связи с этим детекторы UNKNOWN будут недоступны!")
+        print("Постарайтесь решить вопросы с зависимостями GPU/CUDA, чтобы пользоваться всем функционалом.")
+    else:
+        print("Процесс детекции будет реализован на GPU!")
     if args.model == "yolov8":
         detector = YOLO(r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights\yolov8n-face.pt")
     elif args.model == "mtcnn":
-        detector = MTCNN(keep_all=True, device='cuda' if torch.cuda.is_available() else 'cpu')
+        detector = MTCNN(keep_all=True, device=device)
     elif args.model == "insightface":
         detector = FaceAnalysis(providers=['CUDAExecutionProvider'])
         detector.prepare(ctx_id=0)

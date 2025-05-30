@@ -14,19 +14,16 @@ from face_detection import RetinaFace
 import mediapipe as mp
 import dlib
 
-# Загружаем классификатор для распознавания лиц (Haar Cascade)
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 def detect_faces(frame, model_name, detector=None, net=None, confidence_threshold=0.5):
-    h, w, _ = frame.shape  # Получаем размеры изображения
+    h, w, _ = frame.shape
 
     if model_name == "yolov8":
-        # Используем YOLOv8 для обнаружения лиц
-        results = detector(frame, device=device)
+        results = detector(frame, device=0)
         return [r.boxes.xyxy.cpu().numpy() for r in results][0]
     
     elif model_name == "dlib":
-        # Используем Dlib для обнаружения лиц
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = detector(gray)
         boxes = []
@@ -36,29 +33,24 @@ def detect_faces(frame, model_name, detector=None, net=None, confidence_threshol
         return boxes
 
     elif model_name == "mtcnn":
-        # Используем MTCNN для обнаружения лиц
         boxes, _ = detector.detect(frame)
         return boxes
 
     elif model_name == "insightface":
-        # Используем InsightFace для обнаружения лиц
         faces = detector.get(frame)
         return [f.bbox for f in faces]
 
     elif model_name == "retinaface":
-        # Используем RetinaFace для обнаружения лиц
         faces = detector(frame)
         boxes = []
         for box, landmarks, score in faces:
             if score < confidence_threshold:
-                continue  # Пропустить слабые детекции
-
+                continue
             x1, y1, x2, y2 = [int(v) for v in box]
             boxes.append([x1, y1, x2, y2])
         return boxes 
 
     elif model_name == "mediapipe":
-        # Используем MediaPipe для обнаружения лиц
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = detector.process(rgb)
         boxes = []
@@ -70,7 +62,6 @@ def detect_faces(frame, model_name, detector=None, net=None, confidence_threshol
         return boxes
 
     elif model_name == "haarcascade":
-        # Используем Haar Cascade для обнаружения лиц
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
         boxes = []
@@ -79,7 +70,6 @@ def detect_faces(frame, model_name, detector=None, net=None, confidence_threshol
         return boxes
     
     elif model_name == "ssd":
-        # Используем SSD для обнаружения лиц
         blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), (104.0, 177.0, 123.0), swapRB=False, crop=False)
         net.setInput(blob)
         detections = net.forward()
@@ -92,8 +82,64 @@ def detect_faces(frame, model_name, detector=None, net=None, confidence_threshol
                 boxes.append([startX, startY, endX, endY])
         return boxes
 
-    return []  # Если модель не распознана, возвращаем пустой список
+    return []
 
+def print_device_info(model_name):
+    # Общая логика по выводу устройства
+    print(f"\nДетектор: {model_name}")
+    if model_name in ["yolov8", "mtcnn"]:
+        print("Фреймворк: PyTorch")
+        if torch.cuda.is_available():
+            print("CUDA доступен. Детектор будет работать на GPU.")
+        else:
+            print("CUDA недоступен. Детектор будет работать на CPU.")
+    elif model_name == "insightface":
+        print("Фреймворк: InsightFace (ONNXRuntime)")
+        try:
+            providers = FaceAnalysis().get_providers()
+            if "CUDAExecutionProvider" in providers:
+                print("CUDA доступен. Детектор будет работать на GPU.")
+            else:
+                print("CUDA недоступен. Используется CPU.")
+        except:
+            print("Не удалось определить CUDA-поддержку. Используется CPU.")
+    elif model_name == "retinaface":
+        print("Фреймворк: RetinaFace (PyTorch/NumPy)")
+        if torch.cuda.is_available():
+            print("CUDA доступен. Возможна работа на GPU.")
+        else:
+            print("CUDA недоступен. Работает на CPU.")
+    elif model_name == "mediapipe":
+        print("Фреймворк: MediaPipe (TensorFlow)")
+        if tf.config.list_physical_devices('GPU'):
+            print("GPU доступен для TensorFlow.")
+        else:
+            print("GPU недоступен. MediaPipe будет использовать CPU.")
+    elif model_name == "dlib":
+        print("Фреймворк: Dlib")
+        print("Работает на CPU. Поддержка GPU ограничена.")
+    elif model_name == "haarcascade":
+        print("Фреймворк: OpenCV (Haar Cascade)")
+        print("Работает исключительно на CPU.")
+    elif model_name == "ssd":
+        print("Детектор: ssd")
+        print("Фреймворк: OpenCV DNN (Caffe model)")
+
+        try:
+            net = cv2.dnn.readNetFromCaffe(path_prototxt, path_model_weights)
+
+            # Пробуем установить backend и target на CUDA
+            net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+            net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+
+            # Если ошибки нет — CUDA доступна
+            print("CUDA backend доступен и используется для OpenCV DNN.")
+        except Exception as e:
+            print("CUDA backend недоступен. Используется CPU.")
+            net.setPreferableBackend(cv2.dnn.DNN_BACKEND_DEFAULT)
+            net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
+
+    print("=" * 80)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -101,27 +147,16 @@ def main():
                         choices=["yolov8", "mtcnn", "insightface", "retinaface", "mediapipe", "dlib", "haarcascade", "ssd"])
     args = parser.parse_args()
 
-    # Проверка доступности CUDA в PyTorch
-    global device
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    # Принудительно выключено
-    device = 'cpu'
-
-    if device == 'cpu':
-        print("Процесс детекции будет реализован на CPU, в связи с этим детекторы UNKNOWN будут недоступны!")
-        print("Постарайтесь решить вопросы с зависимостями GPU/CUDA, чтобы пользоваться всем функционалом.")
-    else:
-        print("Процесс детекции будет реализован на GPU!")
-
-
+    # Печать информации об устройстве и фреймворке
+    print_device_info(args.model)
 
     cap = cv2.VideoCapture(0)
 
-    # Выбор модели
     if args.model == "yolov8":
         detector = YOLO(r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights\yolov8n-face.pt")
 
     elif args.model == "mtcnn":
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
         detector = MTCNN(keep_all=True, device=device)
 
     elif args.model == "insightface":
@@ -139,9 +174,11 @@ def main():
         detector = dlib.get_frontal_face_detector()
 
     elif args.model == "haarcascade":
-        detector = None  # Не требуется дополнительный детектор, так как используется встроенный cascade
+        detector = None
 
     elif args.model == "ssd":
+        global path_prototxt
+        global path_model_weights
         path_prototxt = r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights\deploy.prototxt.txt"
         path_model_weights = r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights\res10_300x300_ssd_iter_140000.caffemodel"
         net = cv2.dnn.readNetFromCaffe(path_prototxt, path_model_weights)
@@ -151,11 +188,10 @@ def main():
         if not ret:
             break
 
-        # Detect faces using the appropriate model
         if args.model == "ssd":
-            boxes = detect_faces(frame, args.model, net=net)  # Pass net for SSD
+            boxes = detect_faces(frame, args.model, net=net)
         else:
-            boxes = detect_faces(frame, args.model, detector)  # Use detector for other models
+            boxes = detect_faces(frame, args.model, detector)
 
         if boxes is not None:
             for box in boxes:
