@@ -95,17 +95,17 @@ def detect_faces(frame, model_name, detector=None, net=None, confidence_threshol
     return []  # Если модель не распознана, возвращаем пустой список
 
 
+import time  # Добавьте в список импортов
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', type=str, required=True,
                         choices=["yolov8", "mtcnn", "insightface", "retinaface", "mediapipe", "dlib", "haarcascade", "ssd"])
     args = parser.parse_args()
 
-    # Проверка доступности CUDA в PyTorch
     global device
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    # Принудительно выключено
-    device = 'cpu'
+    device = 'cpu'  # Принудительно CPU
 
     if device == 'cpu':
         print("Процесс детекции будет реализован на CPU, в связи с этим детекторы UNKNOWN будут недоступны!")
@@ -113,50 +113,44 @@ def main():
     else:
         print("Процесс детекции будет реализован на GPU!")
 
-
-
     cap = cv2.VideoCapture(0)
 
     # Выбор модели
     if args.model == "yolov8":
         detector = YOLO(r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights\yolov8n-face.pt")
-
     elif args.model == "mtcnn":
         detector = MTCNN(keep_all=True, device=device)
-
     elif args.model == "insightface":
         detector = FaceAnalysis(providers=['CUDAExecutionProvider'])
         detector.prepare(ctx_id=0)
-
     elif args.model == "retinaface":
         detector = RetinaFace()
-
     elif args.model == "mediapipe":
         mp_face = mp.solutions.face_detection
         detector = mp_face.FaceDetection(model_selection=0, min_detection_confidence=0.5)
-
     elif args.model == "dlib":
         detector = dlib.get_frontal_face_detector()
-
     elif args.model == "haarcascade":
-        detector = None  # Не требуется дополнительный детектор, так как используется встроенный cascade
-
+        detector = None
     elif args.model == "ssd":
         path_prototxt = r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights\deploy.prototxt.txt"
         path_model_weights = r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights\res10_300x300_ssd_iter_140000.caffemodel"
         net = cv2.dnn.readNetFromCaffe(path_prototxt, path_model_weights)
+
+    prev_time = time.time()
 
     while True:
         ret, frame = cap.read()
         if not ret:
             break
 
-        # Detect faces using the appropriate model
+        # Обнаружение лиц
         if args.model == "ssd":
-            boxes = detect_faces(frame, args.model, net=net)  # Pass net for SSD
+            boxes = detect_faces(frame, args.model, net=net)
         else:
-            boxes = detect_faces(frame, args.model, detector)  # Use detector for other models
+            boxes = detect_faces(frame, args.model, detector)
 
+        # Отрисовка прямоугольников
         if boxes is not None:
             for box in boxes:
                 if box is None:
@@ -164,12 +158,22 @@ def main():
                 x1, y1, x2, y2 = map(int, box)
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
+        # Расчёт и отображение FPS
+        current_time = time.time()
+        fps = 1.0 / (current_time - prev_time)
+        prev_time = current_time
+        cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+
+        # Показ кадра
         cv2.imshow(f"Face Detection - {args.model}", frame)
+
         if cv2.waitKey(1) & 0xFF == 27:
             break
 
     cap.release()
     cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     main()

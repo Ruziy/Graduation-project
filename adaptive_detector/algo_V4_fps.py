@@ -189,8 +189,10 @@ def main():
 
         # Визуализация
         elapsed = time.time() - start
-        info = f"{best_model.upper()} | Profile: {profile} | Time: {elapsed*1000:.1f} ms"
+        fps = 1.0 / elapsed if elapsed > 0 else 0.0
+        info = f"{best_model.upper()} | Profile: {profile} | Time: {elapsed*1000:.1f} ms | FPS: {fps:.1f}"
         cv2.putText(frame, info, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
+
 
         y_offset = 50
         for name, score in sorted(scores.items(), key=lambda x: -x[1]):

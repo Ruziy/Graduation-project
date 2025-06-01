@@ -13,6 +13,7 @@ from insightface.app import FaceAnalysis
 from face_detection import RetinaFace
 import mediapipe as mp
 import dlib
+import time
 
 # Haar Cascade для резервного детектора
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + r'haarcascade_frontalface_default.xml')
@@ -128,10 +129,17 @@ def main():
 
     cap = cv2.VideoCapture(0)
 
+    prev_time = time.time()
+
     while True:
         ret, frame = cap.read()
         if not ret:
             break
+
+        # Время начала кадра
+        current_time = time.time()
+        fps = 1 / (current_time - prev_time)
+        prev_time = current_time
 
         # Анализ качества
         brightness = calculate_brightness(frame)
@@ -156,15 +164,16 @@ def main():
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
         # Вывод информации
-        text = f"{selected_model.upper()} | Brightness: {brightness:.1f} | Contrast: {contrast:.1f} | Blur: {blur:.1f}"
+        text = f"{selected_model.upper()} | Brightness: {brightness:.1f} | Contrast: {contrast:.1f} | Blur: {blur:.1f} | FPS: {fps:.1f}"
         cv2.putText(frame, text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
         cv2.imshow("Face Detection (Auto)", frame)
-
+        
         if cv2.waitKey(1) & 0xFF == 27:  # ESC для выхода
             break
 
     cap.release()
     cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     main()
