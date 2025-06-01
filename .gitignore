@@ -3,3 +3,4 @@ filter_test/data
 speed_test/data
 weights/
 Отчет
+API/__pycache__
