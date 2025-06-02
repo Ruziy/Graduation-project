@@ -52,48 +52,66 @@ def analyze_scene_profile(metrics):
         profile += "overexposed "
     if contrast < 30:
         profile += "flat "
-    elif contrast > 60:
+    elif contrast > 100:
         profile += "high-contrast "
     if sharpness < 50:
         profile += "blurry "
-    if noise > 20:
+    if noise > 50:
         profile += "noisy "
 
 
     return profile.strip()
 
+def normalize(value, min_val, max_val):
+    """Нормализация значения в диапазон [0, 1] с защитой от выхода за пределы"""
+    if max_val == min_val:
+        return 0.0
+    return max(0.0, min(1.0, (value - min_val) / (max_val - min_val)))
+
 def compute_detector_scores(metrics):
     norm = {
-        "brightness": normalize(metrics["brightness"], 0, 255),
-        "contrast": normalize(metrics["contrast"], 0, 100),
-        "sharpness": normalize(metrics["sharpness"], 0, 500),
-        "noise": normalize(metrics["noise"], 0, 100)
+        metric: normalize(metrics[metric], *limits)
+        for metric, limits in {
+            "brightness": (0, 255),
+            "contrast": (0, 100),
+            "sharpness": (0, 500),
+            "noise": (0, 100)
+        }.items()
     }
+
     rotate_base = {
-    "yolov8":      0.6,
+    "yolov8":      0.9,
     "retinaface":  1.0,
     "insightface": 0.8,
-    "mtcnn":       0.7,
-    "mediapipe":   0.6,
-    "ssd":         0.7,
-    "dlib":        0.5,
-    "haarcascade": 0.6
+    "mtcnn":       0.3,
+    "mediapipe":   0.5,
+    "ssd":         0.4,
+    "dlib":        0.2,
+    "haarcascade": 0.5
 }
 
     # Новые веса устойчивости по результатам:
+    # weights = {
+    #     "yolov8":      1.3 * norm["contrast"] + 1.3 * norm["brightness"] - 0.7 * norm["noise"] + 1.2 * norm["sharpness"] + rotate_base["yolov8"],
+    #     "retinaface":  1.2 * norm["contrast"] + 1.2 * norm["brightness"] - 0.4 * norm["noise"] + 1.2 * norm["sharpness"] + rotate_base["retinaface"],
+    #     "insightface": 1.1 * norm["contrast"] + 1.1 * norm["brightness"] - 0.2 * norm["noise"] + 1.0 * norm["sharpness"] + rotate_base["insightface"],
+    #     "mtcnn":       0.5 * norm["contrast"] + 0.5 * norm["brightness"] - 0.7 * norm["noise"] + 0.7 * norm["sharpness"] + rotate_base["mtcnn"],
+    #     "mediapipe":   0.3 * norm["contrast"] + 0.9 * norm["brightness"] - 1.2 * norm["noise"] + 0.5 * norm["sharpness"] + rotate_base["mediapipe"],
+    #     "ssd":         0.4 * norm["contrast"] + 0.4 * norm["brightness"] - 0.8 * norm["noise"] + 0.7 * norm["sharpness"] + rotate_base["ssd"],
+    #     "dlib":        0.4 * norm["contrast"] + 0.4 * norm["brightness"] - 1.0 * norm["noise"] + 0.4 * norm["sharpness"] + rotate_base["dlib"],
+    #     "haarcascade": 0.7 * norm["contrast"] + 0.7 * norm["brightness"] - 0.5 * norm["noise"] + 0.8 * norm["sharpness"] + rotate_base["haarcascade"]
+    # }
+    # Усиленные коэффициенты — контраст, яркость, резкость и шум влияют сильнее
     weights = {
-        "yolov8":      1.3 * norm["contrast"] + 1.1 * norm["brightness"] - 1.1 * norm["noise"] + 1.0 * norm["sharpness"] + rotate_base["yolov8"],
-        "retinaface":  1.1 * norm["contrast"] + 0.8 * norm["brightness"] - 0.4 * norm["noise"] + 1.2 * norm["sharpness"] + rotate_base["retinaface"],
-        "insightface": 1.0 * norm["contrast"] + 0.8 * norm["brightness"] + 1.2 * norm["noise"] + 1.1 * norm["sharpness"] + rotate_base["insightface"],
-        "mtcnn":       0.8 * norm["contrast"] + 1.0 * norm["brightness"] + 1.2 * norm["noise"] + 0.9 * norm["sharpness"] + rotate_base["mtcnn"],
-        "mediapipe":   0.7 * norm["contrast"] + 0.9 * norm["brightness"] - 0.5 * norm["noise"] + 0.8 * norm["sharpness"] + rotate_base["mediapipe"],
-        "ssd":         1.1 * norm["contrast"] + 0.9 * norm["brightness"] - 0.6 * norm["noise"] + 0.6 * norm["sharpness"] + rotate_base["ssd"],
-        "dlib":        0.9 * norm["contrast"] + 0.7 * norm["brightness"] + 1.2 * norm["noise"] + 0.6 * norm["sharpness"] + rotate_base["dlib"],
-        "haarcascade": 0.8 * norm["contrast"] + 0.7 * norm["brightness"] + 1.0 * norm["noise"] + 0.7 * norm["sharpness"] + rotate_base["haarcascade"]
+        "yolov8":      3.9 * norm["contrast"] + 3.9 * norm["brightness"] - 2.1 * norm["noise"] + 3.6 * norm["sharpness"] + rotate_base["yolov8"],
+        "retinaface":  3.6 * norm["contrast"] + 3.6 * norm["brightness"] - 1.2 * norm["noise"] + 3.6 * norm["sharpness"] + rotate_base["retinaface"],
+        "insightface": 3.3 * norm["contrast"] + 3.3 * norm["brightness"] - 0.6 * norm["noise"] + 3.0 * norm["sharpness"] + rotate_base["insightface"],
+        "mtcnn":       1.5 * norm["contrast"] + 1.5 * norm["brightness"] - 2.1 * norm["noise"] + 2.1 * norm["sharpness"] + rotate_base["mtcnn"],
+        "mediapipe":   0.9 * norm["contrast"] + 2.7 * norm["brightness"] - 3.6 * norm["noise"] + 1.5 * norm["sharpness"] + rotate_base["mediapipe"],
+        "ssd":         1.2 * norm["contrast"] + 1.2 * norm["brightness"] - 2.4 * norm["noise"] + 2.1 * norm["sharpness"] + rotate_base["ssd"],
+        "dlib":        1.2 * norm["contrast"] + 1.2 * norm["brightness"] - 3.0 * norm["noise"] + 1.2 * norm["sharpness"] + rotate_base["dlib"],
+        "haarcascade": 2.1 * norm["contrast"] + 2.1 * norm["brightness"] - 1.5 * norm["noise"] + 2.4 * norm["sharpness"] + rotate_base["haarcascade"]
     }
-
-
-
 
     return weights
 
@@ -213,7 +231,7 @@ def main():
         y_offset = 50
         for name, score in sorted(scores.items(), key=lambda x: -x[1]):
             text = f"{name}: {score:.2f}"
-            cv2.putText(frame, text, (10, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
+            cv2.putText(frame, text, (10, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
             y_offset += 20
 
         cv2.imshow("Smart Face Detector", frame)
