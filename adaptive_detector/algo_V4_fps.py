@@ -62,7 +62,6 @@ def analyze_scene_profile(metrics):
 
     return profile.strip()
 
-# Взвешенное принятие решения
 def compute_detector_scores(metrics):
     norm = {
         "brightness": normalize(metrics["brightness"], 0, 255),
@@ -70,17 +69,34 @@ def compute_detector_scores(metrics):
         "sharpness": normalize(metrics["sharpness"], 0, 500),
         "noise": normalize(metrics["noise"], 0, 100)
     }
+    rotate_base = {
+    "yolov8":      0.6,
+    "retinaface":  1.0,
+    "insightface": 0.8,
+    "mtcnn":       0.7,
+    "mediapipe":   0.6,
+    "ssd":         0.7,
+    "dlib":        0.5,
+    "haarcascade": 0.6
+}
 
+    # Новые веса устойчивости по результатам:
     weights = {
-        "yolov8":     1.5 * norm["contrast"] + 1.0 * norm["brightness"] - 1.2 * norm["noise"],
-        "retinaface": 1.2 * norm["sharpness"] - 0.5 * norm["noise"] + 0.8 * norm["contrast"],
-        "insightface":1.0 * norm["contrast"] + 1.0 * norm["sharpness"] - 0.3 * norm["noise"],
-        "mtcnn":      1.3 * norm["sharpness"] + 1.0 * norm["brightness"] - 0.8 * norm["noise"],
-        "mediapipe":  0.8 * norm["brightness"] + 0.8 * norm["sharpness"],
-        "ssd":        0.7 * norm["brightness"] + 0.7 * norm["contrast"] - 1.0 * norm["noise"]
+        "yolov8":      1.3 * norm["contrast"] + 1.1 * norm["brightness"] - 1.1 * norm["noise"] + 1.0 * norm["sharpness"] + rotate_base["yolov8"],
+        "retinaface":  1.1 * norm["contrast"] + 0.8 * norm["brightness"] - 0.4 * norm["noise"] + 1.2 * norm["sharpness"] + rotate_base["retinaface"],
+        "insightface": 1.0 * norm["contrast"] + 0.8 * norm["brightness"] + 1.2 * norm["noise"] + 1.1 * norm["sharpness"] + rotate_base["insightface"],
+        "mtcnn":       0.8 * norm["contrast"] + 1.0 * norm["brightness"] + 1.2 * norm["noise"] + 0.9 * norm["sharpness"] + rotate_base["mtcnn"],
+        "mediapipe":   0.7 * norm["contrast"] + 0.9 * norm["brightness"] - 0.5 * norm["noise"] + 0.8 * norm["sharpness"] + rotate_base["mediapipe"],
+        "ssd":         1.1 * norm["contrast"] + 0.9 * norm["brightness"] - 0.6 * norm["noise"] + 0.6 * norm["sharpness"] + rotate_base["ssd"],
+        "dlib":        0.9 * norm["contrast"] + 0.7 * norm["brightness"] + 1.2 * norm["noise"] + 0.6 * norm["sharpness"] + rotate_base["dlib"],
+        "haarcascade": 0.8 * norm["contrast"] + 0.7 * norm["brightness"] + 1.0 * norm["noise"] + 0.7 * norm["sharpness"] + rotate_base["haarcascade"]
     }
 
+
+
+
     return weights
+
 
 def select_best_detector(metrics):
     profile = analyze_scene_profile(metrics)

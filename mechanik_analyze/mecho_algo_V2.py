@@ -102,7 +102,8 @@ def main():
     args = parser.parse_args()
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
+    if device == "cuda":
+        print("Определён CUDA!! Обработка будет через GPU")
     cap = cv2.VideoCapture(0)
 
     # Инициализация модели
