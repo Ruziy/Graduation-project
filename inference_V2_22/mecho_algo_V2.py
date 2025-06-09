@@ -9,26 +9,25 @@ import platform
 from ultralytics import YOLO
 from facenet_pytorch import MTCNN
 from insightface.app import FaceAnalysis
-from retinaface import RetinaFace
+from face_detection import RetinaFace
 import mediapipe as mp
 from ultralytics.utils import LOGGER
 import logging
 
 # Отключить все логи ниже ERROR
 LOGGER.setLevel(logging.ERROR)
-
 def measure_cpu_usage(interval=1.0):
     """Измеряет загрузку CPU за указанное время (в процентах)"""
     return psutil.cpu_percent(interval=interval)
 
 def get_lighter_detector(current):
     hierarchy = [
-        "insightface", # самая тяжёлая
+        "insightface",  # максимально тяжёлая
         "retinaface",    
         "yolov8",
         "mtcnn",
-        "dlib",
         "ssd",
+        "dlib",
         "mediapipe",
         "haarcascade"   # минимально тяжёлая
     ]
@@ -56,11 +55,13 @@ def detect_faces(frame, model, detector=None, net=None):
         for face in faces:
             boxes.append(face.bbox)
     elif model == "retinaface":
-        detections = RetinaFace.detect_faces(frame)
-        if isinstance(detections, dict):
-            for _, det in detections.items():
-                box = det["facial_area"]
-                boxes.append(box)
+        # Используем RetinaFace для обнаружения лиц
+        faces = detector(frame)
+        boxes = []
+        for box, landmarks, score in faces:
+            x1, y1, x2, y2 = [int(v) for v in box]
+            boxes.append([x1, y1, x2, y2])
+
     elif model == "mediapipe":
         results = detector.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
         if results.detections:
@@ -114,7 +115,7 @@ def main():
     # Инициализация модели
     detector, net = None, None
     if args.model == "yolov8":
-        detector = YOLO(r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights/yolov8n-face.pt")
+        detector = YOLO(r"weights/yolov8n-face.pt")
     elif args.model == "mtcnn":
         detector = MTCNN(keep_all=True, device=device)
     elif args.model == "insightface":
@@ -128,8 +129,8 @@ def main():
     elif args.model == "dlib":
         detector = dlib.get_frontal_face_detector()
     elif args.model == "ssd":
-        net = cv2.dnn.readNetFromCaffe(r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights/deploy.prototxt.txt",
-                                       r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights/res10_300x300_ssd_iter_140000.caffemodel")
+        net = cv2.dnn.readNetFromCaffe(r"weights/deploy.prototxt.txt",
+                                       r"weights/res10_300x300_ssd_iter_140000.caffemodel")
 
     prev_time = time.time()
     start_time = time.time()
@@ -147,6 +148,7 @@ def main():
             boxes = detect_faces(frame, args.model, net=net)
         else:
             boxes = detect_faces(frame, args.model, detector)
+
         if boxes is not None:
             for box in boxes:
                 if box is None:
@@ -174,6 +176,7 @@ def main():
             avg_fps = frame_count / (current_time - start_time)
             avg_cpu = sum(cpu_usages) / len(cpu_usages)
 
+            # Сбор логов в список
             calibration_log = []
             calibration_log.append(f"🔧 Калибровка завершена: модель {args.model}")
             calibration_log.append(f"📊 Средний FPS: {avg_fps:.2f}")
@@ -186,7 +189,7 @@ def main():
                 args.model = get_lighter_detector(args.model)
 
                 if args.model == "yolov8":
-                    detector = YOLO(r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights\yolov8n-face.pt")
+                    detector = YOLO(r"weights/yolov8n-face.pt")
                 elif args.model == "mtcnn":
                     detector = MTCNN(keep_all=True, device=device)
                 elif args.model == "insightface":
@@ -203,14 +206,16 @@ def main():
                     detector = None
                 elif args.model == "ssd":
                     net = cv2.dnn.readNetFromCaffe(
-                        r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights\deploy.prototxt.txt",
-                        r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights\res10_300x300_ssd_iter_140000.caffemodel"
+                        r"weights/deploy.prototxt.txt",
+                        r"weights/res10_300x300_ssd_iter_140000.caffemodel"
                     )
 
+                # Сброс счётчиков
                 start_time = time.time()
                 frame_count = 0
                 cpu_usages = []
                 calibrated = False
+
             else:
                 calibrated = True
                 calibration_log.append("✅ Калибровка прошла успешно. Требования к FPS и CPU соблюдены.")
@@ -221,6 +226,7 @@ def main():
                 response = {"status": "Калибровка завершена", "output": calibration_result}
                 exit(0)
 
+            # Вывод логов в консоль и в ответ
             calibration_result = "\n".join(calibration_log)
             print(calibration_result)
             response = {"status": "Калибровка завершена", "output": calibration_result}
@@ -235,5 +241,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

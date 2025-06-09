@@ -20,7 +20,7 @@ tf.get_logger().setLevel('ERROR')
 def normalize(val, min_val, max_val):
     return max(0.0, min(1.0, (val - min_val) / (max_val - min_val + 1e-5)))
 
-# Метрики качества изображения
+
 def calculate_image_metrics(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -88,20 +88,7 @@ def compute_detector_scores(metrics):
     "ssd":         0.4,
     "dlib":        0.2,
     "haarcascade": 0.5
-    }
-
-    weights = {
-        "yolov8":      3.9 * norm["contrast"] + 3.9 * norm["brightness"] - 2.1 * norm["noise"] + 3.6 * norm["sharpness"] + rotate_base["yolov8"],
-        "retinaface":  3.6 * norm["contrast"] + 3.6 * norm["brightness"] - 1.2 * norm["noise"] + 3.6 * norm["sharpness"] + rotate_base["retinaface"],
-        "insightface": 3.3 * norm["contrast"] + 3.3 * norm["brightness"] - 0.6 * norm["noise"] + 3.0 * norm["sharpness"] + rotate_base["insightface"],
-        "mtcnn":       1.5 * norm["contrast"] + 1.5 * norm["brightness"] - 2.1 * norm["noise"] + 2.1 * norm["sharpness"] + rotate_base["mtcnn"],
-        "mediapipe":   0.9 * norm["contrast"] + 2.7 * norm["brightness"] - 3.6 * norm["noise"] + 1.5 * norm["sharpness"] + rotate_base["mediapipe"],
-        "ssd":         1.2 * norm["contrast"] + 1.2 * norm["brightness"] - 2.4 * norm["noise"] + 2.1 * norm["sharpness"] + rotate_base["ssd"],
-        "dlib":        1.2 * norm["contrast"] + 1.2 * norm["brightness"] - 3.0 * norm["noise"] + 1.2 * norm["sharpness"] + rotate_base["dlib"],
-        "haarcascade": 2.1 * norm["contrast"] + 2.1 * norm["brightness"] - 1.5 * norm["noise"] + 2.4 * norm["sharpness"] + rotate_base["haarcascade"]
-    }
-
-    return weights
+}
 
     # Новые веса устойчивости по результатам:
     # weights = {
@@ -115,6 +102,20 @@ def compute_detector_scores(metrics):
     #     "haarcascade": 0.7 * norm["contrast"] + 0.7 * norm["brightness"] - 0.5 * norm["noise"] + 0.8 * norm["sharpness"] + rotate_base["haarcascade"]
     # }
     # Усиленные коэффициенты — контраст, яркость, резкость и шум влияют сильнее
+    weights = {
+        "yolov8":      3.9 * norm["contrast"] + 3.9 * norm["brightness"] - 2.1 * norm["noise"] + 3.6 * norm["sharpness"] + rotate_base["yolov8"],
+        "retinaface":  3.6 * norm["contrast"] + 3.6 * norm["brightness"] - 1.2 * norm["noise"] + 3.6 * norm["sharpness"] + rotate_base["retinaface"],
+        "insightface": 3.3 * norm["contrast"] + 3.3 * norm["brightness"] - 0.6 * norm["noise"] + 3.0 * norm["sharpness"] + rotate_base["insightface"],
+        "mtcnn":       1.5 * norm["contrast"] + 1.5 * norm["brightness"] - 2.1 * norm["noise"] + 2.1 * norm["sharpness"] + rotate_base["mtcnn"],
+        "mediapipe":   0.9 * norm["contrast"] + 2.7 * norm["brightness"] - 3.6 * norm["noise"] + 1.5 * norm["sharpness"] + rotate_base["mediapipe"],
+        "ssd":         1.2 * norm["contrast"] + 1.2 * norm["brightness"] - 2.4 * norm["noise"] + 2.1 * norm["sharpness"] + rotate_base["ssd"],
+        "dlib":        1.2 * norm["contrast"] + 1.2 * norm["brightness"] - 3.0 * norm["noise"] + 1.2 * norm["sharpness"] + rotate_base["dlib"],
+        "haarcascade": 2.1 * norm["contrast"] + 2.1 * norm["brightness"] - 1.5 * norm["noise"] + 2.4 * norm["sharpness"] + rotate_base["haarcascade"]
+    }
+
+    return weights
+
+
 def select_best_detector(metrics):
     profile = analyze_scene_profile(metrics)
     scores = compute_detector_scores(metrics)
@@ -170,27 +171,21 @@ def detect_faces(frame, model_name, detector=None, net=None, conf=0.5):
                 box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
                 boxes.append(box.astype("int").tolist())
         return boxes
-    
-    elif model_name == "haarcascade":
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-        for (x, y, w, h) in faces:
-            boxes.append([x, y, x + w, y + h])
+
     return []
 
 # Инициализация
 def init_detectors(device):
     return {
-        "yolov8": YOLO(r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights\yolov8n-face.pt"),
+        "yolov8": YOLO(r"weights/yolov8n-face.pt"),
         "mtcnn": MTCNN(keep_all=True, device=device),
         "retinaface": RetinaFace(),
         "mediapipe": mp.solutions.face_detection.FaceDetection(model_selection=0, min_detection_confidence=0.5),
         "dlib": dlib.get_frontal_face_detector(),
         "insightface": FaceAnalysis(providers=['CUDAExecutionProvider']),
         "ssd": cv2.dnn.readNetFromCaffe(
-            r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights\deploy.prototxt.txt",
-            r"C:\Users\Alex\Desktop\diplom\Graduation-project\weights\res10_300x300_ssd_iter_140000.caffemodel"
+            r"weights/deploy.prototxt.txt",
+            r"weights/res10_300x300_ssd_iter_140000.caffemodel"
         )
     }
 

@@ -3,21 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <title>Панель управления алгоритмами</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="static\styles.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1><span class="material-icons icon">settings</span>Панель управления</h1>
-        
         <form method="post" action="/run-mode-ui">
+            <!-- Выбор режима -->
             <label for="mode"><span class="material-icons icon">tune</span>Режим работы:</label>
-            <select name="mode" id="mode">
+            <select name="mode" id="mode" onchange="toggleCalibrationFields()">
                 <option value="1">🔧 Калибровка</option>
                 <option value="2">🧠 Оптимизация</option>
             </select>
-            <button type="submit">🚀 Запустить</button>
+
+            <!-- Поля для калибровки -->
+            <div id="calibration-fields">
+                <label for="fps_threshold">FPS порог:</label>
+                <input type="number" name="fps_threshold" id="fps_threshold" step="0.1" value="10.0">
+
+                <label for="cpu_threshold">CPU порог (%):</label>
+                <input type="number" name="cpu_threshold" id="cpu_threshold" step="0.1" value="50.0">
+            </div>
+
+            <button type="submit" style="margin-bottom: 20px;">🚀 Запустить</button>
         </form>
+
+        <script>
+        function toggleCalibrationFields() {
+            const mode = document.getElementById("mode").value;
+            const calibFields = document.getElementById("calibration-fields");
+            calibFields.style.display = (mode === "1") ? "block" : "none";
+        }
+        window.onload = toggleCalibrationFields;
+        </script>
+
 
         <form method="post" action="/select-model-ui">
             <label for="model_name"><span class="material-icons icon">model_training</span>Доступные модели:</label>
@@ -26,7 +45,7 @@
                     <option value="dlib">Dlib</option>
                     <option value="mtcnn">MTCNN</option>
                     <option value="insightface">InsightFace</option>
-                    <option value="retinaFace">RetinaFace</option>
+                    <option value="retinaface">RetinaFace</option>
                     <option value="mediapipe">MediaPipe</option>
                     <option value="haarcascade">Haar Cascade</option>
                     <option value="ssd">SSD</option>

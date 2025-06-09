@@ -47,7 +47,7 @@ def run_base_model_script(model_name: str):
         return {"status": "Ошибка при выполнении base.py", "error": e.stderr}
 
 
-def run_calibration_script(model="yolov8", fps_threshold=10.0, cpu_threshold=50.0):
+def run_calibration_script(model="insightface", fps_threshold=10.0, cpu_threshold=50.0):
     try:
         result = subprocess.run(
             [
@@ -117,8 +117,7 @@ class ModeRequest(BaseModel):
 
 class ModelChoice(BaseModel):
     selected_model_name: Literal[
-        "yolov8", "dlib", "mtcnn", "insightface", 
-        "retinaFace", "mediapipe", "haarcascade", "ssd"
+        "yolov8","insightface","dlib", "mtcnn", "retinaface", "mediapipe", "haarcascade", "ssd"
     ]
 
 
@@ -139,7 +138,7 @@ def run_mode_ui(
 
     if mode == 1:
         # Калибровка
-        model = "yolov8"  # Модель по умолчанию для калибровки
+        model = "insightface"  # Модель по умолчанию для калибровки
         result = run_calibration_script(model, fps_threshold, cpu_threshold)
 
     elif mode == 2:
