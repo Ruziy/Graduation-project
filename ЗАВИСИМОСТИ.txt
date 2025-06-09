@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 1.официальный установщик CMake. https://cmake.org/download/
 Установите его, обязательно выбрав опцию "Add CMake to system PATH".
 cmake --version
@@ -56,4 +57,64 @@ pip install tf-keras
 5.pip install python-multipart
 pip install retina-face
 pip install mediapipe
+=======
+1.официальный установщик CMake. https://cmake.org/download/
+Установите его, обязательно выбрав опцию "Add CMake to system PATH".
+cmake --version
+2.https://visualstudio.microsoft.com/visual-cpp-build-tools/
+Скачайте "Build Tools for Visual Studio".
+Во время установки обязательно выберите:
+C++ build tools
+А также проверьте, что выбраны:
+MSVC v14.x
+Windows 10 SDK
+CMake tools for Windows (может потребоваться для некоторых зависимостей)
+Перезагрузите компьютер после завершения установки.
+3.Анаконда
+====Пакеты
+1.conda create -n diplom_V3 python=3.10
+2.conda install -c conda-forge \
+    numpy=2.2.6 \
+    scipy=1.15.2 \
+    scikit-learn=1.6.1 \
+    pandas=2.2.3 \
+    matplotlib=3.10.1 \
+    seaborn=0.13.2 \
+    pillow=11.2.1 \
+    h5py=3.13.0 \
+    tk=8.6.13 \
+    libblas=3.9.0 \
+    liblapack=3.9.0 \
+    mkl=2023.2.0 \
+    intel-openmp=2025.1.0 \
+    pip=25.0.1 \
+    -y
+3.pip install tensorboard==2.19.0 tensorboard-data-server==0.7.2 tensorboard-plugin-wit==1.8.1 tensorflow==2.19.0 tensorflow-estimator==2.10.0 tensorflow-io-gcs-filesystem==0.31.0
+pip install tf-keras
+4.pip install \
+    opencv-python==4.11.0.86 \
+    opencv-contrib-python==4.11.0.86 \
+    facenet-pytorch==2.6.0 \
+    dlib==19.24.8 \
+    albumentations==2.0.8 \
+    matplotlib==3.10.1 \
+    fastapi==0.115.12 \
+    uvicorn \
+    requests \
+    beautifulsoup4 \
+    insightface==0.7.3 \
+    ultralytics==8.3.116 \
+    tqdm \
+    yacs \
+    pycocotools \
+    onnx==1.17.0 \
+    onnxruntime==1.22.0 \
+    torch==2.2.2+cpu \
+    torchvision==0.17.2+cpu \
+    torchaudio==2.2.2+cpu \
+    --extra-index-url https://download.pytorch.org/whl/cpu
+5.pip install python-multipart
+pip install retina-face
+pip install mediapipe
+>>>>>>> 4ca8b7b6911a61c0c0b7a16344f20e07530c2c2d
 pip install git+https://github.com/elliottzheng/face-detection.git@master 
