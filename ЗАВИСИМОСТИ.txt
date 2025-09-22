@@ -60,3 +60,4 @@ pip install mediapipe
 6.pip uninstall -y tensorflow-estimator protobuf
 pip install "protobuf>=5.28,<7"
 pip install -U "tensorflow==2.20.0" "tf-keras==2.20.1" "tensorboard==2.20.0"
+7.conda install face_recognition
