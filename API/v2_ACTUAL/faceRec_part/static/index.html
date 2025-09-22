@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Face Web</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">👤 Face Web</div>
+      <div class="tabs">
+        <div class="tab active" data-tab="live">Распознавание</div>
+        <div class="tab" data-tab="add">Добавить в базу</div>
+      </div>
+    </div>
+
+    <div id="live" class="card">
+      <div class="grid">
+        <div class="canvas-wrap">
+          <video id="video" autoplay playsinline></video>
+          <canvas id="overlay"></canvas>
+        </div>
+        <div>
+          <div class="badge" id="conn">WS: offline</div>
+          <div class="controls">
+            <button id="startBtn">Старт</button>
+            <button id="stopBtn" class="secondary" disabled>Стоп</button>
+          </div>
+          <div class="status" id="status">Готово.</div>
+          <div class="status">Известные люди:</div>
+          <div id="people"></div>
+        </div>
+      </div>
+      <div class="footer">Открой именно http://localhost:8000/ (а не file://). Разреши доступ к камере.</div>
+    </div>
+
+    <div id="add" class="card" style="display:none">
+      <div class="row">
+        <input id="person" type="text" placeholder="Имя (латиницей/рус.)" />
+      </div>
+      <div class="row">
+        <input id="files" type="file" accept="image/*" multiple />
+      </div>
+      <div class="controls">
+        <button id="uploadBtn">Загрузить в known_faces</button>
+      </div>
+      <div class="status" id="uploadStatus"></div>
+    </div>
+  </div>
+
+  <!-- Скрипт строго в конце body -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
