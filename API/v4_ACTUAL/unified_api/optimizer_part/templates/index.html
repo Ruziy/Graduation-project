@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Панель алгоритмов</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- ВАЖНО: url_for('static', ...) резолвится в /optimizer/static/... -->
+  <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">⚙️ Панель алгоритмов</div>
+    </div>
+
+    <div class="card">
+      <!-- БЬЁМ НА ПОД-ПРИЛОЖЕНИЕ: /optimizer/run-mode-ui -->
+      <form method="post" action="{{ url_for('run_mode_ui') }}">
+        <div class="row">
+          <label for="mode" class="label">
+            <span class="material-icons icon">tune</span>
+            Режим работы
+          </label>
+          <select name="mode" id="mode">
+            <option value="1">🔧 Калибровка</option>
+            <option value="2">🧠 Оптимизация</option>
+            <!-- <option value="3">🧪 Запуск base.py (выбранная модель)</option> -->
+          </select>
+        </div>
+
+        <div id="calibration-fields" class="stack">
+          <label for="fps_threshold" class="label">FPS порог</label>
+          <input type="number" name="fps_threshold" id="fps_threshold" step="0.1" value="10.0" />
+
+          <label for="cpu_threshold" class="label">CPU порог (%)</label>
+          <input type="number" name="cpu_threshold" id="cpu_threshold" step="0.1" value="50.0" />
+        </div>
+
+        <div class="controls">
+          <button type="submit" id="runBtn">🚀 Запустить</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <!-- /optimizer/select-model-ui -->
+      <form method="post" action="{{ url_for('select_model_ui') }}">
+        <div class="row">
+          <label for="model_name" class="label">
+            <span class="material-icons icon">model_training</span>
+            Доступные модели
+          </label>
+          <select name="model_name" id="model_name">
+            <option value="yolov8">YOLOv8</option>
+            <option value="dlib">Dlib</option>
+            <option value="mtcnn">MTCNN</option>
+            <option value="insightface">InsightFace</option>
+            <option value="retinaface">RetinaFace</option>
+            <option value="mediapipe">MediaPipe</option>
+            <option value="haarcascade">Haar Cascade</option>
+            <option value="ssd">SSD</option>
+          </select>
+        </div>
+
+        <div class="controls">
+          <button type="submit">✅ Выбрать модель</button>
+        </div>
+      </form>
+
+      {% if result %}
+      <div class="result">
+        {% if result.status %}
+          <div><strong>Статус:</strong> {{ result.status }}</div>
+        {% endif %}
+        {% if result.output %}
+          <pre>{{ result.output }}</pre>
+        {% else %}
+          <pre>{{ result }}</pre>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <p class="muted">
+        🔘 Текущая модель:
+        <strong>{{ current_model if current_model else "—" }}</strong>
+      </p>
+    </div>
+  </div>
+
+  <!-- Скрипт строго в конце body -->
+  <script>
+  (function(){
+    const byId = id => document.getElementById(id);
+
+    function toggleCalibrationFields(){
+      const mode = byId('mode')?.value;
+      const wrap = byId('calibration-fields');
+      if(!wrap) return;
+      wrap.style.display = (mode === '1') ? '' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const modeEl = byId('mode');
+      if(modeEl){
+        modeEl.addEventListener('change', toggleCalibrationFields);
+      }
+      toggleCalibrationFields();
+    });
+  })();
+  </script>
+</body>
+</html>
