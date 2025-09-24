@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>🧩 Unified API Hub</title>
+  <link rel="stylesheet" href="/optimizer/static/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">🧩 Unified API Hub</div>
+    </div>
+
+    <div class="grid hub">
+      <div class="card tile">
+        <div class="tile-head">
+          <div class="tile-emoji">⚙️</div>
+          <div class="tile-title">Калибровка / Оптимизация / Выбор модели</div>
+        </div>
+        <div class="tile-body">
+          UI формы и запуск скриптов (<code>optimizer_part</code>).
+        </div>
+        <div class="controls">
+          <a class="btn" href="/optimizer/">Открыть</a>
+        </div>
+      </div>
+
+      <div class="card tile">
+        <div class="tile-head">
+          <div class="tile-emoji">👤</div>
+          <div class="tile-title">Распознавание лиц</div>
+        </div>
+        <div class="tile-body">
+          Видеопоток + WebSocket (<code>faceRec_part</code>).
+        </div>
+        <div class="controls">
+          <a class="btn" href="/face/">Открыть</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer" style="margin-top:16px">
+      <div class="muted">Запусти через Uvicorn: <code>uvicorn gateway:app --host 0.0.0.0 --port 8000 --reload</code></div>
+    </div>
+  </div>
+  <script>(function(){ console.log('[HUB] ready'); })();</script>
+</body>
+</html>
