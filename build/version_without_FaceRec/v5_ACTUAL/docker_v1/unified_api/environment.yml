@@ -1,0 +1,20 @@
+﻿name: diplom
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - setuptools
+  - wheel
+  - ca-certificates
+
+  # базовые научные либы из conda (без scipy!)
+  - numpy=1.26.4
+  - scikit-learn=1.7.2
+  - pandas=2.3.2
+  - matplotlib=3.10.1
+  - seaborn=0.13.2
+  - pillow=10.2.0
+  - h5py=3.14.0
+  - tk=8.6.13
+ 
