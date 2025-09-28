@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Панель алгоритмов</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f7f9fc;
+      --card:#ffffff;
+      --ink:#0f172a;
+      --muted:#5b6575;
+      --acc:#2563eb;
+      --ok:#16a34a;
+      --warn:#ef4444;
+      --bd:rgba(16,24,40,.10);
+      --bd-strong:rgba(16,24,40,.18);
+      --r:16px;
+      --shadow: 0 10px 30px rgba(16,24,40,.08);
+      --shadow-hover: 0 14px 40px rgba(16,24,40,.12);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .container{max-width:920px;margin:0 auto;padding:24px}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    .brand{font-size:22px;font-weight:800;letter-spacing:.2px}
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--bd);
+      border-radius:var(--r);
+      padding:18px;
+      box-shadow:var(--shadow);
+      margin-bottom:16px;
+      transition: box-shadow .2s ease, transform .15s ease;
+    }
+    .card:hover{ box-shadow:var(--shadow-hover); transform: translateY(-1px); }
+
+    .row{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+    .stack{display:flex;flex-direction:column;gap:8px}
+
+    .label{font-weight:700;color:#1f2937;display:flex;align-items:center;gap:8px}
+    .icon{font-size:20px;color:#334155}
+
+    select, input[type=number]{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid var(--bd-strong);
+      background:#fff;
+      color:var(--ink);
+      font-size:14px;
+      outline:none;
+      transition: border-color .2s ease, box-shadow .2s ease, transform .06s ease;
+    }
+    select:focus, input[type=number]:focus{
+      border-color:var(--acc);
+      box-shadow:0 0 0 4px rgba(37,99,235,.12);
+    }
+    select:active, input[type=number]:active{ transform: scale(.997); }
+
+    .controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    button{
+      padding:11px 16px;
+      border:0;
+      border-radius:12px;
+      background:linear-gradient(135deg, var(--acc), #00b3ff);
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+      letter-spacing:.2px;
+      transition: transform .08s ease, filter .2s ease, box-shadow .2s ease;
+      box-shadow: 0 6px 16px rgba(37,99,235,.25);
+    }
+    button:hover{ filter:brightness(1.04); box-shadow:0 8px 22px rgba(37,99,235,.33); }
+    button:active{ transform: translateY(1px) scale(.998); }
+    button.secondary{
+      background:#eef2ff;
+      color:#3730a3;
+      box-shadow:none;
+      border:1px solid rgba(55,48,163,.15);
+    }
+    button.secondary:hover{ filter:none; background:#e0e7ff; }
+
+    .result{
+      margin-top:12px;
+      color:var(--ink);
+      background:#f3f6ff;
+      border:1px solid rgba(37,99,235,.2);
+      border-radius:12px;
+      padding:12px;
+      white-space:pre-wrap;
+      overflow:auto;
+      max-height:50vh;
+    }
+    .muted{margin-top:12px;color:var(--muted);font-style:italic}
+
+    #calibration-fields{
+      padding:12px;
+      background:#f8fafc;
+      border:1px solid var(--bd);
+      border-radius:12px;
+      margin-top:8px;
+    }
+
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+    input[type=number]{ -moz-appearance:textfield; }
+
+    /* мини-«хлебные крошки»/секция */
+    .subhead{
+      display:flex;align-items:center;gap:8px;
+      font-weight:700;color:#1f2937;margin-bottom:10px
+    }
+
+    /* лёгкая анимация появления карточек */
+    .card{opacity:0; transform: translateY(6px); animation: pop .25s ease forwards;}
+    .card:nth-of-type(2){animation-delay:.04s}
+    .card:nth-of-type(3){animation-delay:.08s}
+    @keyframes pop{to{opacity:1; transform:none}}
+
+    /* адаптив */
+    @media (max-width:640px){
+      .container{padding:16px}
+      .brand{font-size:20px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">⚙️ Панель алгоритмов</div>
+    </div>
+
+    <!-- Режимы -->
+    <div class="card">
+      <div class="subhead"><span class="material-icons icon">tune</span>Режим работы</div>
+      <form method="post" action="{{ url_for('run_mode_ui') }}">
+        <div class="row">
+          <select name="mode" id="mode" aria-label="Режим работы">
+            <option value="1">🔧 Калибровка</option>
+            <option value="2">🧠 Оптимизация</option>
+          </select>
+        </div>
+
+        <div id="calibration-fields" class="stack">
+          <label for="fps_threshold" class="label">
+            <span class="material-icons icon">speed</span>FPS порог
+          </label>
+          <input type="number" name="fps_threshold" id="fps_threshold" step="0.1" value="10.0" />
+
+          <label for="cpu_threshold" class="label">
+            <span class="material-icons icon">memory</span>CPU порог (%)
+          </label>
+          <input type="number" name="cpu_threshold" id="cpu_threshold" step="0.1" value="50.0" />
+        </div>
+
+        <div class="controls">
+          <button type="submit" id="runBtn">🚀 Запустить</button>
+          <a class="button-link" href="/" style="text-decoration:none">
+            <button type="button" class="secondary">Вернуться к началу</button>
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Выбор модели -->
+    <div class="card">
+      <div class="subhead"><span class="material-icons icon">model_training</span>Доступные модели</div>
+      <form method="post" action="{{ url_for('select_model_ui') }}">
+        <div class="row">
+          <select name="model_name" id="model_name" aria-label="Выбор модели">
+            <option value="yolov8">YOLOv8</option>
+            <option value="dlib">Dlib</option>
+            <option value="mtcnn">MTCNN</option>
+            <option value="insightface">InsightFace</option>
+            <option value="retinaface">RetinaFace</option>
+            <option value="mediapipe">MediaPipe</option>
+            <option value="haarcascade">Haar Cascade</option>
+            <option value="ssd">SSD</option>
+          </select>
+        </div>
+
+        <div class="controls">
+          <button type="submit">✅ Выбрать модель</button>
+          <!-- <a class="button-link" href="/optimizer/run-mode-ui" style="text-decoration:none">
+            <button type="button" class="secondary">К запуску режимов</button>
+          </a> -->
+        </div>
+      </form>
+
+      {% if result %}
+      <div class="result" role="status" aria-live="polite">
+        {% if result.status %}
+          <div><strong>Статус:</strong> {{ result.status }}</div>
+        {% endif %}
+        {% if result.output %}
+          <pre>{{ result.output }}</pre>
+        {% else %}
+          <pre>{{ result }}</pre>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <p class="muted">
+        🔘 Текущая модель:
+        <strong>{{ current_model if current_model else "—" }}</strong>
+      </p>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const byId = id => document.getElementById(id);
+
+    function toggleCalibrationFields(){
+      const mode = byId('mode')?.value;
+      const wrap = byId('calibration-fields');
+      if(!wrap) return;
+      wrap.style.display = (mode === '1') ? '' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const modeEl = byId('mode');
+      if(modeEl){ modeEl.addEventListener('change', toggleCalibrationFields); }
+      toggleCalibrationFields();
+    });
+  })();
+  </script>
+</body>
+</html>
