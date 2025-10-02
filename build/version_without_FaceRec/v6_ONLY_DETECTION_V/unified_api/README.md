@@ -1,41 +1,17 @@
-# Unified API (FastAPI + Uvicorn)
-
+# Unified API (FastAPI + Uvicorn) 
+# Первая версия ПО без блока распознавания лиц
 Единая точка входа, объединяющая два твоих проекта:
 
 - `optimizer_part/` — калибровка/оптимизация/выбор модели (твоя логика сохранена)
-- `faceRec_part/` — распознавание лиц (твоя логика сохранена)
+
 
 ## Запуск
 
 ```bash
-
-uvicorn gateway:app --host 0.0.0.0 --port 8000 --reload
+Запустите run.bat, предварительно загрузив ENV.tar.gz и папку weights из google disk (https://drive.google.com/file/d/1leVnVAzmqxJCOMf5fjm5fQKKQdwqGv1M/view?usp=sharing).
 ```
 
 Открой в браузере: http://localhost:8000/
 
-- `/optimizer/` — первая часть (UI форм)  
-- `/face/` — распознавание лиц
+- `/optimizer/` — ТОЛЬКО часть с оптимизатором
 
-## Структура
-
-```
-unified_api/
-  gateway.py
-  templates/
-    hub.html
-  optimizer_part/
-    main_V3.py
-    base.py
-    mecho_algo_V2.py
-    algo_V4_fps.py
-    templates/index.html
-    static/styles.css
-    ...
-  faceRec_part/
-    app.py
-    settings.py
-    static/{index.html, style.css, app.js}
-    known_faces/...
-    ...
-```
