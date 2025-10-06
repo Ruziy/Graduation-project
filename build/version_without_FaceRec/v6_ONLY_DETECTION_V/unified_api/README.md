@@ -66,10 +66,7 @@ C:.
     |           deploy.prototxt.txt
     |           haarcascade_frontalface_default.xml
     |           res10_300x300_ssd_iter_140000.caffemodel
-    |           yolov5m-face.pt
-    |           yolov5n.pt
     |           yolov8n-face.pt
-    |           yunet.onnx
     |
     \---templates
             hub.html
