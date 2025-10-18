@@ -1,4 +1,4 @@
-# Первая версия ПО без блока распознавания лиц
+# Вторая версия ПО с блоком распознавания лиц
 ## Общие зависимости (необходимо предварительно установить):
 1.Официальный установщик CMake. 
 
@@ -42,13 +42,23 @@ CMake tools for Windows (может потребоваться для некот
 
 ## Структура проекта:
 ```bash
-C:.
+C:
 |   DIPLOM_PO_win-64.tar.gz
 |
 \---unified_api
-    |   gateway.py — единая точка входа проекта.
+    |   gateway.py
     |   README.md
     |   run.bat
+    |
+    +---faceRec_part
+    |   |   app.py
+    |   |   log.txt
+    |   |
+    |   +---known_faces
+    |   \---static
+    |           app.js
+    |           index.html
+    |           style.css
     |
     +---optimizer_part
     |   |   algo_V4_fps.py
@@ -66,10 +76,7 @@ C:.
     |           deploy.prototxt.txt
     |           haarcascade_frontalface_default.xml
     |           res10_300x300_ssd_iter_140000.caffemodel
-    |           yolov5m-face.pt
-    |           yolov5n.pt
     |           yolov8n-face.pt
-    |           yunet.onnx
     |
     \---templates
             hub.html
