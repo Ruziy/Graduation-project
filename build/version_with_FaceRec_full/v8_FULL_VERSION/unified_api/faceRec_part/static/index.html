@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Face Web</title>
+  <link rel="stylesheet" href="static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">👤 Face Web</div>
+      <div class="tabs" role="tablist" aria-label="Разделы">
+        <button class="tab active" data-tab="live" role="tab" aria-selected="true">Распознавание</button>
+        <button class="tab" data-tab="add" role="tab" aria-selected="false">Добавить в базу</button>
+      </div>
+    </div>
+
+    <div id="live" class="card" role="region" aria-labelledby="tab-live">
+      <div class="grid">
+        <div class="canvas-wrap">
+          <video id="video" autoplay playsinline></video>
+          <canvas id="overlay"></canvas>
+        </div>
+
+        <div class="panel">
+          <div class="badge" id="conn" aria-live="polite">WS: offline</div>
+
+          <div class="controls">
+            <button id="startBtn" class="btn">🚀 Старт</button>
+            <button id="stopBtn" class="btn secondary" disabled>⏹ Стоп</button>
+          </div>
+
+          <div class="status" id="status">Готово.</div>
+
+          <div class="status title">Известные люди</div>
+          <div id="people" class="people"></div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Открывайте именно <code>http://localhost:8000/</code> (не <code>file://</code>) и разрешите доступ к камере.
+        <div class="controls" style="margin-top:12px">
+          <a href="/" class="btn secondary">Вернуться к началу</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="add" class="card" style="display:none" role="region" aria-labelledby="tab-add">
+      <div class="row">
+        <label class="label" for="person">Имя (латиницей/рус.)</label>
+        <input id="person" type="text" placeholder="Например: alex" />
+      </div>
+
+      <div class="row">
+        <label class="label" for="files">Изображения</label>
+        <input id="files" type="file" accept="image/*" multiple />
+      </div>
+
+      <div class="controls">
+        <button id="uploadBtn" class="btn">⬆️ Загрузить в known_faces</button>
+      </div>
+
+      <div class="status" id="uploadStatus" aria-live="polite"></div>
+
+      <div class="footer" style="margin-top:16px">
+        <a href="/" class="btn secondary">Вернуться к началу</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="static/app.js"></script>
+</body>
+</html>
