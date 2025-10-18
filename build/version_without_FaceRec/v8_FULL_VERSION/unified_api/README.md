@@ -35,7 +35,7 @@ https://www.anaconda.com/download
 Перезагрузите компьютер после завершения всех установок.
 
 ### 4.Выгрузите необходимые ENV.tar.gz и папку weights/ 
-Из google disk (https://drive.google.com/file/d/1leVnVAzmqxJCOMf5fjm5fQKKQdwqGv1M/view?usp=sharing), и поместите согласно структуре(описана ниже).
+Из google disk ([https://drive.google.com/file/d/1leVnVAzmqxJCOMf5fjm5fQKKQdwqGv1M/view?usp=sharing](https://drive.google.com/file/d/1MxGFeY4X5si8LJavwY_w983CFKq8fs7c/view?usp=sharing)), и поместите согласно структуре(описана ниже).
 
  Либо скачайте полностью архив.
  ## Запуск
@@ -53,7 +53,7 @@ C:
 |   DIPLOM_PO_win-64.tar.gz
 |
 \---unified_api
-    |   gateway.py
+    |   gateway.py — единая точка входа проекта.
     |   README.md
     |   run.bat
     |
