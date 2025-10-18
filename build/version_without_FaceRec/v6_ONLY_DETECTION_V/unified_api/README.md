@@ -1,6 +1,6 @@
 # Первая версия ПО без блока распознавания лиц
 ## Общие зависимости (необходимо предварительно установить):
-1.Официальный установщик CMake. 
+### 1.Официальный установщик CMake. 
 
 https://cmake.org/download/
 
@@ -10,7 +10,7 @@ https://cmake.org/download/
 ```bash
 cmake --version
 ```
-2.Скачайте "Build Tools for Visual Studio".
+### 2.Скачайте "Build Tools for Visual Studio".
 
 https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
@@ -26,9 +26,16 @@ Windows 10 SDK
 CMake tools for Windows (может потребоваться для некоторых зависимостей)
 ```
 
-Перезагрузите компьютер после завершения установки.
 
-3.Выгрузите необходимые ENV.tar.gz и папку weights из google disk (https://drive.google.com/file/d/1leVnVAzmqxJCOMf5fjm5fQKKQdwqGv1M/view?usp=sharing), и поместите согласно структуре(описана ниже).
+### 3.Официальный установщик Anaconda/Miniconda.
+
+https://www.anaconda.com/download
+
+
+Перезагрузите компьютер после завершения всех установок.
+
+### 4.Выгрузите необходимые ENV.tar.gz и папку weights/ 
+Из google disk ([https://drive.google.com/file/d/1leVnVAzmqxJCOMf5fjm5fQKKQdwqGv1M/view?usp=sharing](https://drive.google.com/file/d/1O_Q-EXp5HsakpXsPrKlSQgGbtnUf08jE/view?usp=sharing)), и поместите согласно структуре(описана ниже).
 
  Либо скачайте полностью архив.
  ## Запуск
