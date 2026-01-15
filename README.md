@@ -33,7 +33,7 @@ docker run -p 8000:8000 diplom_docker
 ```
 Из GitRepo:
 ```bash
-git clone [https://github.com/yourusername/adaptive-face-detector.git](https://github.com/Ruziy/Graduation-project)
+git clone https://github.com/Ruziy/Graduation-project
 cd adaptive-face-detector
 pip install -r requirements.txt
 ```
